@@ -1,0 +1,38 @@
+name: Enterprise Auto Test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install chromium
+
+      - name: Run tests
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          ADMIN_URL: ${{ secrets.ADMIN_URL }}
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          CONTENT_API: ${{ secrets.CONTENT_API }}
+          LOGIN_API: ${{ secrets.LOGIN_API }}
+        run: |
+          python -m pytest --html=test-report.html --self-contained-html
